@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+// ✅ Declare after imports
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function App() {
   const [text, setText] = useState("");
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchEntries = async () => {
-    const res = await axios.get("http://localhost:5000/api/entries");
-    setEntries(res.data);
+    try {
+      const res = await axios.get(`${API}/api/entries`);
+      setEntries(res.data);
+    } catch (err) {
+      console.error("Failed to fetch entries:", err);
+    }
   };
 
   useEffect(() => {
@@ -18,9 +25,13 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const res = await axios.post("http://localhost:5000/api/entry", { text });
-    setEntries([res.data, ...entries]);
-    setText("");
+    try {
+      const res = await axios.post(`${API}/api/entry`, { text });
+      setEntries([res.data, ...entries]);
+      setText("");
+    } catch (err) {
+      console.error("Failed to submit entry:", err);
+    }
     setLoading(false);
   };
 
@@ -46,7 +57,9 @@ function App() {
             <p>{entry.text}</p>
             <p><strong>Summary:</strong> {entry.summary}</p>
             <p><strong>Mood:</strong> {entry.mood}</p>
-            <p style={{ fontSize: "12px", color: "#888" }}>{new Date(entry.createdAt).toLocaleString()}</p>
+            <p style={{ fontSize: "12px", color: "#888" }}>
+              {new Date(entry.createdAt).toLocaleString()}
+            </p>
           </div>
         ))}
       </div>
